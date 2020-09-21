@@ -1,0 +1,8 @@
+toml==0.10.1
+numpy==1.19.2
+pyrealsense2==2.38.1.2225
+opencv-python==4.2.0.32
+cvui==2.7
+click==7.1.2
+pytz==2020.1
+pathlib==1.0.1
