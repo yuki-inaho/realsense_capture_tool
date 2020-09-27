@@ -11,7 +11,8 @@ class RealSenseManager:
         self._setting()
         self._set_intrinsic_parameters()
         self._lock: RLock = RLock()
-        self._ir_frame : np.ndarray = []
+        self._ir_frame_left : np.ndarray = []
+        self._ir_frame_right : np.ndarray = []
         self._color_frame : np.ndarray = []
         self._depth_frame : np.ndarray = []
 
@@ -22,6 +23,7 @@ class RealSenseManager:
         self._pipeline = rs.pipeline()
         self._config = rs.config()
         self._config.enable_stream(rs.stream.infrared, 1, self._image_width, self._image_height, rs.format.y8, 30)
+        self._config.enable_stream(rs.stream.infrared, 2, self._image_width, self._image_height, rs.format.y8, 30)
         self._config.enable_stream(rs.stream.depth, self._image_width, self._image_height, rs.format.z16, 30)
         self._config.enable_stream(rs.stream.color, self._image_width, self._image_height, rs.format.bgr8, 30)
         self._profile = self._pipeline.start(self._config)
@@ -31,6 +33,16 @@ class RealSenseManager:
         depth_intrinsic_rs = profile_depth.as_video_stream_profile().get_intrinsics()
         profile_color = self._profile.get_stream(rs.stream.color)
         color_intrinsic_rs = profile_color.as_video_stream_profile().get_intrinsics()
+
+        profile_left = self._profile.get_stream(rs.stream.infrared, 1)
+        profile_right = self._profile.get_stream(rs.stream.infrared, 2)
+
+        depth_profile = profile_depth.as_video_stream_profile()
+        color_profile = profile_color.as_video_stream_profile()
+        ir_left_profile = profile_left.as_video_stream_profile()
+        ir_right_profile = profile_right.as_video_stream_profile()
+
+        self._left_to_right_extrinsic = ir_left_profile.get_extrinsics_to(ir_right_profile)
 
         self._depth_intrinsic = self._cvt_intrinsics(depth_intrinsic_rs)
         self._color_intrinsic = self._cvt_intrinsics(color_intrinsic_rs)
@@ -49,10 +61,11 @@ class RealSenseManager:
     def update(self):
         with self._lock:
             frames = self._pipeline.wait_for_frames()
-            self._ir_frame = self._cvt_ndarray(frames.get_infrared_frame())
+            self._ir_frame_left = self._cvt_ndarray(frames.get_infrared_frame(1))
+            self._ir_frame_right = self._cvt_ndarray(frames.get_infrared_frame(2))
             self._depth_frame = self._cvt_ndarray(frames.get_depth_frame())
             self._color_frame = self._cvt_ndarray(frames.get_color_frame())
-            if (self._depth_frame is not None) and (self._color_frame is not None) and (self._ir_frame is not None):
+            if (self._depth_frame is not None) and (self._color_frame is not None):
                 return True
             else:
                 return False
@@ -82,7 +95,15 @@ class RealSenseManager:
 
     @property
     def ir_frame(self):
-        return self._ir_frame
+        return self._ir_frame_left
+
+    @property
+    def ir_frame_left(self):
+        return self._ir_frame_left
+
+    @property
+    def ir_frame_right(self):
+        return self._ir_frame_right
 
     @property
     def depth_frame(self):
@@ -105,3 +126,11 @@ class RealSenseManager:
     @property
     def image_size(self):
         return (self._image_width, self._image_height)
+
+    @property
+    def rotation_dcm_ir_left2right(self):
+        return np.asarray(self._left_to_right_extrinsic.rotation).reshape(3,3)
+
+    @property
+    def translation_ir_left2right(self):
+        return np.asarray(self._left_to_right_extrinsic.translation)

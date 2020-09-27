@@ -13,3 +13,10 @@ fx = 0
 fy = 0
 cx = 0
 cy = 0
+
+[IR_Translation]
+tx = 0
+ty = 0
+tz = 0
+
+

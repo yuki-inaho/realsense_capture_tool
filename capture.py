@@ -40,7 +40,8 @@ def main(save_dir):
         status = rs_mng.update()
         if status:
             # Get Images
-            ir_image = rs_mng.ir_frame
+            ir_image_left = rs_mng.ir_frame_left
+            ir_image_right = rs_mng.ir_frame_right
             color_image = rs_mng.color_frame
             depth_image = rs_mng.depth_frame
 
@@ -48,7 +49,7 @@ def main(save_dir):
             frame = draw_frames(frame, color_image, depth_image, res_image_width, res_image_height)
 
             if cvui.button(frame, 50, res_image_height+50, 130, 50, "Save Result Image") or key & 0xFF == ord('s'):
-                save_images(color_image, depth_image, ir_image, save_dir)
+                save_images(color_image, depth_image, ir_image_left, ir_image_right, save_dir)
                 captured_frame_count += 1
 
             if cvui.button(frame, 200, res_image_height+50, 130, 50, "Clear"):

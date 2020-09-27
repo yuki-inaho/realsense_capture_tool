@@ -13,6 +13,11 @@ def set_intrinsics(dict_toml, key_name, intrinsic):
     dict_toml[key_name]["cx"] = intrinsic.cx
     dict_toml[key_name]["cy"] = intrinsic.cy
 
+def set_translation(dict_toml, translation):
+    dict_toml["IR_Translation"]["tx"] = float(translation[0])
+    dict_toml["IR_Translation"]["ty"] = float(translation[1])
+    dict_toml["IR_Translation"]["tz"] = float(translation[2])
+
 def main():
     cfg_template_path = str(Path(CFG_DIR_PATH, "realsense_toml_template.toml"))
     cfg_output_path = str(Path(CFG_DIR_PATH, "realsense.toml"))
@@ -25,9 +30,11 @@ def main():
     rs_mng = RealSenseManager()
     intrinsic_depth = rs_mng.intrinsic_depth
     intrinsic_color = rs_mng.intrinsic_color
+    translation = rs_mng.translation_ir_left2right
 
     set_intrinsics(dict_toml, "RGB_Intrinsics", intrinsic_color)
     set_intrinsics(dict_toml, "Depth_Intrinsics", intrinsic_depth)
+    set_translation(dict_toml, translation)
 
     with open(cfg_output_path, "w") as f:
         toml.encoder.dump(dict_toml, f)
