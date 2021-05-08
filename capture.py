@@ -11,22 +11,23 @@ from scripts.utils import (
     clean_save_dir,
     count_images,
     draw_frames,
-    save_images
+    save_images,
 )
 
 
 SCRIPT_DIR_PATH = Path(__file__).resolve().parent
 
+
 @click.command()
 @click.option("--save-dir", "-s", default="{}/data".format(SCRIPT_DIR_PATH))
 def main(save_dir):
     make_save_dir(save_dir)
-    rs_mng = RealSenseManager() #default image size = (1280, 720)
+    rs_mng = RealSenseManager()  # default image size = (1280, 720)
     image_width, image_height = rs_mng.image_size
 
-    res_image_width = int(image_width*2/3)
-    res_image_height = int(image_height*2/3)
-    window_image_width = int(image_width*4/3)
+    res_image_width = int(image_width * 2 / 3)
+    res_image_height = int(image_height * 2 / 3)
+    window_image_width = int(image_width * 4 / 3)
     window_image_height = int(image_height)
 
     cvui.init("capture")
@@ -48,22 +49,25 @@ def main(save_dir):
             # Visualize Images
             frame = draw_frames(frame, color_image, depth_image, res_image_width, res_image_height)
 
-            if cvui.button(frame, 50, res_image_height+50, 130, 50, "Save Result Image") or key & 0xFF == ord('s'):
+            if cvui.button(frame, 50, res_image_height + 50, 130, 50, "Save Result Image") or key & 0xFF == ord("s"):
                 save_images(color_image, depth_image, ir_image_left, ir_image_right, save_dir)
                 captured_frame_count += 1
 
-            if cvui.button(frame, 200, res_image_height+50, 130, 50, "Clear"):
+            if cvui.button(frame, 200, res_image_height + 50, 130, 50, "Clear"):
                 clean_save_dir(save_dir)
                 captured_frame_count = 0
 
-            cvui.printf(frame, 50, res_image_height+150, 0.8, 0x00ff00, "Number of Captured Images : %d", captured_frame_count)
-            if key & 0xFF == ord('q'):
+            cvui.printf(
+                frame, 50, res_image_height + 150, 0.8, 0x00FF00, "Number of Captured Images : %d", captured_frame_count
+            )
+            if key & 0xFF == ord("q"):
                 break
 
             cvui.update()
             cvui.imshow("capture", frame)
 
     cv2.destroyAllWindows()
+
 
 if __name__ == "__main__":
     main()

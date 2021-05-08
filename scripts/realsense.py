@@ -3,6 +3,7 @@ import numpy as np
 from threading import RLock
 from scripts.camera_parameter import Intrinsic
 
+
 class RealSenseManager:
     def __init__(self, image_width=1280, image_height=720):
         self._image_width = image_width
@@ -11,10 +12,10 @@ class RealSenseManager:
         self._setting()
         self._set_intrinsic_parameters()
         self._lock: RLock = RLock()
-        self._ir_frame_left : np.ndarray = []
-        self._ir_frame_right : np.ndarray = []
-        self._color_frame : np.ndarray = []
-        self._depth_frame : np.ndarray = []
+        self._ir_frame_left: np.ndarray = []
+        self._ir_frame_right: np.ndarray = []
+        self._color_frame: np.ndarray = []
+        self._depth_frame: np.ndarray = []
 
     def __del__(self):
         self._pipeline.stop()
@@ -80,7 +81,6 @@ class RealSenseManager:
         depth_sensor = device.query_sensors()[0]
         depth_sensor.set_option(rs.option.laser_power, 150)
 
-
     @property
     def intrinsic_depth(self):
         return self._depth_intrinsic
@@ -115,8 +115,8 @@ class RealSenseManager:
 
     @property
     def P_color(self):
-        P = np.zeros([3,4])
-        P[:3,:3] = self._color_intrinsic.K
+        P = np.zeros([3, 4])
+        P[:3, :3] = self._color_intrinsic.K
         return P
 
     @property
@@ -129,7 +129,7 @@ class RealSenseManager:
 
     @property
     def rotation_dcm_ir_left2right(self):
-        return np.asarray(self._left_to_right_extrinsic.rotation).reshape(3,3)
+        return np.asarray(self._left_to_right_extrinsic.rotation).reshape(3, 3)
 
     @property
     def translation_ir_left2right(self):

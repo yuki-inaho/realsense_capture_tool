@@ -1,11 +1,11 @@
 from collections import OrderedDict
 from scripts.realsense import RealSenseManager
 from pathlib import Path
-import click
 import toml
 
 SCRIPT_DIR_PATH = Path(__file__).resolve().parent
 CFG_DIR_PATH = Path(SCRIPT_DIR_PATH, "cfg")
+
 
 def set_intrinsics(dict_toml, key_name, intrinsic):
     dict_toml[key_name]["fx"] = intrinsic.fx
@@ -13,10 +13,12 @@ def set_intrinsics(dict_toml, key_name, intrinsic):
     dict_toml[key_name]["cx"] = intrinsic.cx
     dict_toml[key_name]["cy"] = intrinsic.cy
 
+
 def set_translation(dict_toml, translation):
     dict_toml["IR_Translation"]["tx"] = float(translation[0])
     dict_toml["IR_Translation"]["ty"] = float(translation[1])
     dict_toml["IR_Translation"]["tz"] = float(translation[2])
+
 
 def main():
     cfg_template_path = str(Path(CFG_DIR_PATH, "realsense_toml_template.toml"))
@@ -39,6 +41,7 @@ def main():
     with open(cfg_output_path, "w") as f:
         toml.encoder.dump(dict_toml, f)
         print("generated")
+
 
 if __name__ == "__main__":
     main()

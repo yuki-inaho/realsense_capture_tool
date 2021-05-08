@@ -1,5 +1,7 @@
 .venv/
 data/
+cfg/realsense.toml
 scripts/__pycache__
 poetry.lock
+pyproject.toml
 *.pyc
