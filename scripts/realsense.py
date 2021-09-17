@@ -19,6 +19,7 @@ class RealSenseManager:
 
     def __del__(self):
         self._pipeline.stop()
+        self._device.hardware_reset()
 
     def _setting(self):
         self._pipeline = rs.pipeline()
@@ -28,6 +29,7 @@ class RealSenseManager:
         self._config.enable_stream(rs.stream.depth, self._image_width, self._image_height, rs.format.z16, 30)
         self._config.enable_stream(rs.stream.color, self._image_width, self._image_height, rs.format.bgr8, 30)
         self._profile = self._pipeline.start(self._config)
+        self._device = self._profile.get_device()
 
     def _set_intrinsic_parameters(self):
         profile_depth = self._profile.get_stream(rs.stream.depth)
