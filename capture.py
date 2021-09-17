@@ -73,7 +73,7 @@ def main(save_dir, laser_off):
             cvui.imshow("capture", frame)
 
     cv2.destroyAllWindows()
-
+    del rs_mng
 
 if __name__ == "__main__":
     main()
