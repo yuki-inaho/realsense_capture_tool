@@ -51,12 +51,13 @@ def main(save_dir, laser_off):
             ir_image_right = rs_mng.ir_frame_right
             color_image = rs_mng.color_frame
             depth_image = rs_mng.depth_frame
+            depth_image_aligned2color = rs_mng.depth_frame_aligned2color
 
             # Visualize Images
             frame = draw_frames(frame, color_image, depth_image, res_image_width, res_image_height)
 
             if cvui.button(frame, 50, res_image_height + 50, 130, 50, "Save Result Image") or key & 0xFF == ord("s"):
-                save_images(color_image, depth_image, ir_image_left, ir_image_right, save_dir)
+                save_images(color_image, depth_image, depth_image_aligned2color, ir_image_left, ir_image_right, save_dir)
                 captured_frame_count += 1
 
             if cvui.button(frame, 200, res_image_height + 50, 130, 50, "Clear"):

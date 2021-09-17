@@ -59,10 +59,11 @@ def _save_images_with_name_and_savepath(image, image_name, save_dir_path_str):
     cv2.imwrite(save_name, image)
 
 
-def save_images(color_image, depth_image, ir_image_left, ir_image_right, save_dir_path_str):
+def save_images(color_image, depth_image, depth_image_aligned2color, ir_image_left, ir_image_right, save_dir_path_str):
     time = get_time()
     _save_images = partial(_save_images_with_name_and_savepath, save_dir_path_str=save_dir_path_str)
     _save_images(color_image, "color_image_{}.png".format(time))
     _save_images(ir_image_left, "ir_image_left_{}.png".format(time))
     _save_images(ir_image_right, "ir_image_right_{}.png".format(time))
     _save_images(depth_image, "depth_image_{}.png".format(time))
+    _save_images(depth_image_aligned2color, "depth_image_aligned2color_{}.png".format(time))

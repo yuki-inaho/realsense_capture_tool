@@ -12,10 +12,11 @@ class RealSenseManager:
         self._setting()
         self._set_intrinsic_parameters()
         self._lock: RLock = RLock()
-        self._ir_frame_left: np.ndarray = []
-        self._ir_frame_right: np.ndarray = []
-        self._color_frame: np.ndarray = []
-        self._depth_frame: np.ndarray = []
+        self._ir_frame_left: np.ndarray = np.array([])
+        self._ir_frame_right: np.ndarray = np.array([])
+        self._color_frame: np.ndarray = np.array([])
+        self._depth_frame: np.ndarray = np.array([])
+        self._depth_frame_aligned2color: np.ndarray = np.array([])
 
     def __del__(self):
         self._pipeline.stop()
@@ -23,16 +24,26 @@ class RealSenseManager:
 
     def _setting(self):
         self._pipeline = rs.pipeline()
+
         self._config = rs.config()
         self._config.enable_stream(rs.stream.infrared, 1, self._image_width, self._image_height, rs.format.y8, 30)
         self._config.enable_stream(rs.stream.infrared, 2, self._image_width, self._image_height, rs.format.y8, 30)
         self._config.enable_stream(rs.stream.depth, self._image_width, self._image_height, rs.format.z16, 30)
         self._config.enable_stream(rs.stream.color, self._image_width, self._image_height, rs.format.bgr8, 30)
+
         self._profile = self._pipeline.start(self._config)
         self._device = self._profile.get_device()
 
+        depth_sensor = self._device.first_depth_sensor()
+        #preset_name = depth_sensor.get_option_value_description(rs.option.visual_preset,3)  #'Default':1, 'High Accuracy': 3
+        depth_sensor.set_option(rs.option.visual_preset, 1)
+
+        align_to = rs.stream.color
+        self._align = rs.align(align_to)
+
     def _set_intrinsic_parameters(self):
         profile_depth = self._profile.get_stream(rs.stream.depth)
+
         depth_intrinsic_rs = profile_depth.as_video_stream_profile().get_intrinsics()
         profile_color = self._profile.get_stream(rs.stream.color)
         color_intrinsic_rs = profile_color.as_video_stream_profile().get_intrinsics()
@@ -69,6 +80,10 @@ class RealSenseManager:
             self._ir_frame_right = self._cvt_ndarray(frames.get_infrared_frame(2))
             self._depth_frame = self._cvt_ndarray(frames.get_depth_frame())
             self._color_frame = self._cvt_ndarray(frames.get_color_frame())
+
+            aligned_frames = self._align.process(frames)
+            self._depth_frame_aligned2color = self._cvt_ndarray(aligned_frames.get_depth_frame())
+
             if (self._depth_frame is not None) and (self._color_frame is not None):
                 return True
             else:
@@ -111,6 +126,10 @@ class RealSenseManager:
     @property
     def depth_frame(self):
         return self._depth_frame
+
+    @property
+    def depth_frame_aligned2color(self):
+        return self._depth_frame_aligned2color
 
     @property
     def K_color(self):
