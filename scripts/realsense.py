@@ -44,6 +44,7 @@ class RealSenseManager:
         ir_right_profile = profile_right.as_video_stream_profile()
 
         self._left_to_right_extrinsic = ir_left_profile.get_extrinsics_to(ir_right_profile)
+        self._left_to_color_extrinsic = ir_left_profile.get_extrinsics_to(color_profile)
 
         self._depth_intrinsic = self._cvt_intrinsics(depth_intrinsic_rs)
         self._color_intrinsic = self._cvt_intrinsics(color_intrinsic_rs)
@@ -134,3 +135,11 @@ class RealSenseManager:
     @property
     def translation_ir_left2right(self):
         return np.asarray(self._left_to_right_extrinsic.translation)
+
+    @property
+    def rotation_dcm_ir_left2color(self):
+        return np.asarray(self._left_to_color_extrinsic.rotation).reshape(3, 3)
+
+    @property
+    def translation_ir_left2color(self):
+        return np.asarray(self._left_to_color_extrinsic.translation)

@@ -20,9 +20,15 @@ SCRIPT_DIR_PATH = Path(__file__).resolve().parent
 
 @click.command()
 @click.option("--save-dir", "-s", default="{}/data".format(SCRIPT_DIR_PATH))
-def main(save_dir):
+@click.option("--laser-off", "-l", is_flag=True)
+def main(save_dir, laser_off):
     make_save_dir(save_dir)
     rs_mng = RealSenseManager()  # default image size = (1280, 720)
+    if laser_off:
+        rs_mng.laser_turn_off()
+    else:
+        rs_mng.laser_turn_on()
+
     image_width, image_height = rs_mng.image_size
 
     res_image_width = int(image_width * 2 / 3)
