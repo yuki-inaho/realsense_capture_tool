@@ -35,7 +35,7 @@ class RealSenseManager:
         self._device = self._profile.get_device()
 
         depth_sensor = self._device.first_depth_sensor()
-        #preset_name = depth_sensor.get_option_value_description(rs.option.visual_preset,3)  #'Default':1, 'High Accuracy': 3
+        # preset_name = depth_sensor.get_option_value_description(rs.option.visual_preset,3)  #'Default':1, 'High Accuracy': 3
         depth_sensor.set_option(rs.option.visual_preset, 1)
 
         align_to = rs.stream.color
@@ -44,22 +44,25 @@ class RealSenseManager:
     def _set_intrinsic_parameters(self):
         profile_depth = self._profile.get_stream(rs.stream.depth)
 
-        depth_intrinsic_rs = profile_depth.as_video_stream_profile().get_intrinsics()
         profile_color = self._profile.get_stream(rs.stream.color)
-        color_intrinsic_rs = profile_color.as_video_stream_profile().get_intrinsics()
+        depth_profile = profile_depth.as_video_stream_profile()
+        color_profile = profile_color.as_video_stream_profile()
+        color_intrinsic_rs = color_profile.get_intrinsics()
+        depth_intrinsic_rs = depth_profile.get_intrinsics()
 
         profile_left = self._profile.get_stream(rs.stream.infrared, 1)
         profile_right = self._profile.get_stream(rs.stream.infrared, 2)
-
-        depth_profile = profile_depth.as_video_stream_profile()
-        color_profile = profile_color.as_video_stream_profile()
         ir_left_profile = profile_left.as_video_stream_profile()
         ir_right_profile = profile_right.as_video_stream_profile()
+        ir_left_intrinsic_rs = ir_left_profile.get_intrinsics()
+        ir_right_intrinsic_rs = ir_right_profile.get_intrinsics()
 
         self._left_to_right_extrinsic = ir_left_profile.get_extrinsics_to(ir_right_profile)
         self._left_to_color_extrinsic = ir_left_profile.get_extrinsics_to(color_profile)
 
         self._depth_intrinsic = self._cvt_intrinsics(depth_intrinsic_rs)
+        self._ir_left_intrinsic = self._cvt_intrinsics(ir_left_intrinsic_rs)
+        self._ir_right_intrinsic = self._cvt_intrinsics(ir_right_intrinsic_rs)
         self._color_intrinsic = self._cvt_intrinsics(color_intrinsic_rs)
 
     def _cvt_intrinsics(self, rs_intrinsics: rs.pyrealsense2.intrinsics):
@@ -106,6 +109,14 @@ class RealSenseManager:
     @property
     def intrinsic_color(self):
         return self._color_intrinsic
+
+    @property
+    def intrinsic_ir_left(self):
+        return self._ir_left_intrinsic
+
+    @property
+    def intrinsic_ir_right(self):
+        return self._ir_right_intrinsic
 
     @property
     def color_frame(self):

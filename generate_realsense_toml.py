@@ -37,6 +37,9 @@ def main():
     rs_mng = RealSenseManager()
     intrinsic_depth = rs_mng.intrinsic_depth
     intrinsic_color = rs_mng.intrinsic_color
+    intrinsic_ir_left = rs_mng.intrinsic_ir_left
+    intrinsic_ir_right = rs_mng.intrinsic_ir_right
+
     translation_l2r = rs_mng.translation_ir_left2right
     translation_l2c = rs_mng.translation_ir_left2color
     rotation_dcm_l2r = rs_mng.rotation_dcm_ir_left2right
@@ -45,6 +48,8 @@ def main():
 
     set_intrinsics(dict_toml, "RGB_Intrinsics", intrinsic_color)
     set_intrinsics(dict_toml, "Depth_Intrinsics", intrinsic_depth)
+    set_intrinsics(dict_toml, "IR_Left_Intrinsics", intrinsic_ir_left)
+    set_intrinsics(dict_toml, "IR_Right_Intrinsics", intrinsic_ir_right)
 
     set_translation(dict_toml, "IR_L2R_Translation", translation_l2r)
     set_translation(dict_toml, "IR_L2C_Translation",translation_l2c)
