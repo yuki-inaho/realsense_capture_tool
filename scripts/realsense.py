@@ -4,10 +4,18 @@ from threading import RLock
 from scripts.camera_parameter import Intrinsic
 
 
+# @TODO: manage device config values as namedtuple?
+# @TODO: Add description to each function
+# @TODO: manage device status more sophisticatedly?
+# @TODO: handle alternate mode status
 class RealSenseManager:
-    def __init__(self, image_width=1280, image_height=720):
+    def __init__(self, image_width=1280, image_height=720, laser_power=150):
         self._image_width = image_width
         self._image_height = image_height
+        self._laser_power = laser_power
+
+        self._is_emitter_enabled: bool = True
+        self._is_emitter_alternate_mode_enabled: bool = False
 
         self._setting()
         self._set_intrinsic_parameters()
@@ -35,8 +43,18 @@ class RealSenseManager:
         self._device = self._profile.get_device()
 
         depth_sensor = self._device.first_depth_sensor()
+
         # preset_name = depth_sensor.get_option_value_description(rs.option.visual_preset,3)  #'Default':1, 'High Accuracy': 3
         depth_sensor.set_option(rs.option.visual_preset, 1)
+
+        """ Set Laser Power
+        """
+        depth_sensor.set_option(rs.option.laser_power, self._laser_power)
+        depth_sensor.set_option(rs.option.emitter_always_on, 0)
+        depth_sensor.set_option(rs.option.emitter_enabled, 1)
+        depth_sensor.set_option(rs.option.emitter_on_off, 0)
+        self._is_emitter_enabled = True
+        self._is_emitter_alternate_mode_enabled = False
 
         align_to = rs.stream.color
         self._align = rs.align(align_to)
@@ -95,12 +113,31 @@ class RealSenseManager:
     def laser_turn_off(self):
         device = self._profile.get_device()
         depth_sensor = device.query_sensors()[0]
-        depth_sensor.set_option(rs.option.laser_power, 0)
+        depth_sensor.set_option(rs.option.emitter_enabled, 0)
+        self._is_emitter_enabled = False
+        self._is_emitter_alternate_mode_enabled = False
 
     def laser_turn_on(self):
         device = self._profile.get_device()
         depth_sensor = device.query_sensors()[0]
-        depth_sensor.set_option(rs.option.laser_power, 150)
+        depth_sensor.set_option(rs.option.emitter_enabled, 1)
+        self._is_emitter_enabled = True
+        self._is_emitter_alternate_mode_enabled = False
+
+    def enable_emitter_alternate_mode(self):
+        device = self._profile.get_device()
+        depth_sensor = device.query_sensors()[0]
+        depth_sensor.set_option(rs.option.emitter_enabled, 1)
+        depth_sensor.set_option(rs.option.emitter_on_off, 1)
+        print(depth_sensor.get_option(rs.option.emitter_on_off))
+        self._is_emitter_enabled = True
+        self._is_emitter_alternate_mode_enabled = True
+
+    def disable_emitter_alternate_mode(self):
+        device = self._profile.get_device()
+        depth_sensor = device.query_sensors()[0]
+        depth_sensor.set_option(rs.option.emitter_on_off, 0)
+        self._is_emitter_alternate_mode_enabled = False
 
     @property
     def intrinsic_depth(self):
@@ -175,3 +212,11 @@ class RealSenseManager:
     @property
     def translation_ir_left2color(self):
         return np.asarray(self._left_to_color_extrinsic.translation)
+
+    @property
+    def is_emitter_enabled(self) -> bool:
+        return self._is_emitter_enabled
+
+    @property
+    def is_emitter_alternate_mode_enabled(self) -> bool:
+        return self._is_emitter_alternate_mode_enabled
