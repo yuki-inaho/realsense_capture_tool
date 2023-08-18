@@ -5,3 +5,5 @@ scripts/__pycache__
 poetry.lock
 pyproject.toml
 *.pyc
+data
+.vscode/settings.json
