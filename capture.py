@@ -73,13 +73,13 @@ def main(save_dir, view_ir, laser_off, laser_alternate_mode):
                 clean_save_dir(save_dir)
                 captured_frame_count = 0
 
-            if cvui.button(frame, 350, res_image_height + 50, 150, 50, "Toggle Emitter On-Off"):
+            if cvui.button(frame, 380, res_image_height + 50, 150, 50, "Toggle Emitter On-Off"):
                 if rs_mng.is_emitter_enabled:
                     rs_mng.laser_turn_off()
                 else:
                     rs_mng.laser_turn_on()
 
-            if cvui.button(frame, 550, res_image_height + 50, 250, 50, "Toggle Emitter Alternate Mode"):
+            if cvui.button(frame, 500, res_image_height + 50, 250, 50, "Toggle Emitter Alternate Mode"):
                 if rs_mng.is_emitter_alternate_mode_enabled:
                     rs_mng.disable_emitter_alternate_mode()
                 else:
